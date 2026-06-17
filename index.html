@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Form บันทึกงานยอดผลิต ติดฉลาก V2 </title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4ff;--card:#fff;--border:#dde3f0;
+  --accent:#3b6ff0;--accent2:#6c4ff0;
+  --text:#1a1e2e;--muted:#7a82a0;
+  --green:#18a86b;--red:#e03c3c;
+  --input-bg:#f7f9ff;
+  --shadow:0 2px 12px rgba(60,80,180,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:48px;}
+
+.header{background:linear-gradient(135deg,#3b6ff0,#6c4ff0);padding:24px 20px 18px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08);}
+.header-row{display:flex;align-items:center;gap:12px;margin-bottom:4px;position:relative;}
+.header-icon{width:38px;height:38px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;}
+.header h1{font-size:19px;font-weight:700;color:#fff;}
+.header p{font-size:12px;color:rgba(255,255,255,0.75);margin-left:50px;position:relative;}
+
+.container{padding:18px 16px 0;max-width:480px;margin:0 auto;}
+
+.warn{background:#fff8e6;border:1.5px solid #f5c842;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#7a5c00;line-height:1.6;margin-bottom:16px;display:none;}
+.warn strong{color:#b07800;}
+
+.restore-bar{background:#eef2ff;border:1.5px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:12.5px;color:#1e3a8a;line-height:1.6;margin-bottom:16px;display:none;align-items:center;justify-content:space-between;gap:10px;}
+.restore-bar.show{display:flex;}
+.restore-bar button{flex-shrink:0;border:none;border-radius:7px;padding:7px 12px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.restore-bar .btn-yes{background:var(--accent);color:#fff;}
+.restore-bar .btn-no{background:#fff;color:var(--muted);border:1.5px solid var(--border);}
+
+.card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.card-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.3px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.field{margin-bottom:10px;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+
+input[type=text],input[type=number],select{
+  width:100%;background:var(--input-bg);border:1.5px solid var(--border);
+  border-radius:9px;color:var(--text);font-family:'Sarabun',sans-serif;
+  font-size:15px;padding:10px 13px;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;-webkit-appearance:none;
+}
+input::placeholder{color:#b0b8d0;}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,111,240,0.1);background:#fff;}
+input.invalid{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(224,60,60,0.1) !important;background:#fff8f8 !important;}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a82a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;cursor:pointer;
+}
+select option{background:#fff;}
+
+.large-select{
+  font-size:16px !important;font-weight:700 !important;padding:12px 14px !important;
+  color:#1e3a8a !important;border:2px solid var(--accent) !important;
+  background-color:#f0f5ff !important;
+}
+
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;}
+
+.input-wrap{position:relative;}
+.input-wrap input{padding-right:46px;}
+.unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;color:var(--muted);pointer-events:none;}
+
+.req{color:var(--red);margin-left:2px;}
+
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.status-btn{padding:13px 6px;border:1.5px solid var(--border);border-radius:11px;background:var(--input-bg);color:var(--muted);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;line-height:1.4;}
+.status-btn:active{transform:scale(0.97);}
+.status-btn.s-green{border-color:var(--green);color:var(--green);background:#edfbf4;box-shadow:0 0 0 3px rgba(24,168,107,0.1);}
+.status-btn.s-red{border-color:var(--red);color:var(--red);background:#fff0f0;box-shadow:0 0 0 3px rgba(224,60,60,0.1);}
+
+.other-input{width:100%;margin-top:8px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;padding:9px 13px;outline:none;transition:border-color 0.2s;display:none;}
+.other-input.show{display:block;}
+.other-input:focus{border-color:var(--accent);background:#fff;}
+
+/* --- 2-Level Error Picker --- */
+.ec-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.8px;margin-bottom:6px;margin-top:10px;}
+.ec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.ec-cat{padding:10px 4px;border:1.5px solid var(--border);border-radius:10px;background:var(--input-bg);color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;}
+.ec-cat:active{transform:scale(0.95);}
+.ec-cat.cat-active{border-color:var(--accent);color:var(--accent);background:#eef2ff;box-shadow:0 0 0 3px rgba(59,111,240,0.12);}
+.ec-cat.cat-planned{font-size:13px;}
+.ec-sub{display:none;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
+.ec-sub.show{display:flex;}
+.ec-item{padding:8px 13px;border:1.5px solid var(--border);border-radius:20px;background:var(--input-bg);color:var(--muted);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;line-height:1.3;}
+.ec-item:active{transform:scale(0.96);}
+.ec-item.item-active{border-color:var(--red);color:var(--red);background:#fff0f0;box-shadow:0 0 0 3px rgba(224,60,60,0.1);}
+.ec-selected{margin-top:8px;font-size:13px;color:var(--accent);font-weight:600;min-height:18px;}
+
+.btn-submit{width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity 0.2s,transform 0.1s;box-shadow:0 4px 16px rgba(59,111,240,0.25);margin-top:4px;}
+.btn-submit:active{transform:scale(0.98);opacity:0.9;}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:11px 18px;font-size:14px;font-weight:600;color:var(--text);box-shadow:0 8px 28px rgba(60,80,180,0.13);display:flex;align-items:center;gap:9px;transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);z-index:100;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--green);}
+.toast.err{border-color:var(--red);}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.toast.ok .dot{background:var(--green);}
+.toast.err .dot{background:var(--red);}
+
+.savetag{font-size:10.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="header-icon">📋</div>
+    <h1>บันทึกงานผลิต V2 </h1>
+  </div>
+  <p>กรอกข้อมูลแล้วกดบันทึก → ส่งเข้า Google Sheets อัตโนมัติ</p>
+</div>
+
+<div class="container">
+
+  <div class="warn" id="warn">
+    ⚙️ <strong>ยังไม่ได้ตั้งค่า URL</strong> — เปิดไฟล์ใน VS Code แล้วแทนที่ <code>YOUR_APPS_SCRIPT_URL_HERE</code>
+  </div>
+
+  <div class="restore-bar" id="restoreBar">
+    <span>📥 พบข้อมูลที่กรอกค้างไว้ ต้องการดึงคืนไหม?</span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-yes" onclick="restoreDraft()">ดึงคืน</button>
+      <button class="btn-no" onclick="dismissDraft()">ไม่ใช้</button>
+    </div>
+  </div>
+
+  <!-- Card 1: ข้อมูลงาน -->
+  <div class="card">
+    <div class="card-title">📦 ข้อมูลงาน</div>
+    <div class="field">
+      <label>ไลน์ผลิต <span class="req">*</span></label>
+      <input type="text" id="line" placeholder="เช่น 6">
+    </div>
+    <div class="field">
+      <label>Order Ref. No. <span class="req">*</span></label>
+      <input type="text" id="orderRef" placeholder="เช่น CT47032">
+    </div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0;">
+        <label>Product Code <span class="req">*</span></label>
+        <input type="text" id="productCode" placeholder="เช่น 46L3C01">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Day (วันที่ผลิต) <span class="req">*</span></label>
+        <input type="text" id="productDate" placeholder="เช่น S625">
+      </div>
+    </div>
+    <div class="field">
+      <label>Can Size</label>
+      <input type="text" id="canSize" placeholder="เช่น 211x109">
+    </div>
+    <div class="field">
+      <label>@ (อัตราจำนวนสินค้า)</label>
+      <input type="text" id="productRate" placeholder="เช่น 12">
+    </div>
+  </div>
+
+  <!-- Card 2: ช่วงเวลาผลิต + plannedMins -->
+  <div class="card">
+    <div class="card-title">🕐 ช่วงเวลาผลิต</div>
+    <div class="field">
+      <label>ช่วงเวลา <span class="req">*</span></label>
+      <select id="timeSlot" class="large-select">
+        <option value="" disabled selected hidden>-- เลือกช่วงเวลา --</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>เวลาแผน (นาที) <span class="req">*</span></label>
+      <div class="input-wrap">
+        <input type="number" id="plannedMins" placeholder="60" min="1" max="999" value="60">
+        <span class="unit">นาที</span>
+      </div>
+      <div class="hint">ปกติ 1 ชั่วโมง = 60 นาที</div>
+    </div>
+  </div>
+
+  <!-- Card 3: ยอดผลิต -->
+  <div class="card">
+    <div class="card-title">📊 ยอดผลิตประจำชั่วโมง</div>
+    <div class="field">
+      <label>ยอดผลิต (กล่อง/ชม.) <span class="req">*</span></label>
+      <div class="input-wrap">
+        <input type="number" id="goodCount" placeholder="0" min="0">
+        <span class="unit">กล่อง</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4: สถานะ -->
+  <div class="card">
+    <div class="card-title">🚦 สถานะการเดินเครื่อง</div>
+    <input type="hidden" id="status-val">
+    <div class="status-grid">
+      <button class="status-btn" onclick="setStatus('เดินเครื่องปกติ','s-green',this)">🟢<br>เดินเครื่องปกติ</button>
+      <button id="btn-stop" class="status-btn" onclick="setStatus('มีเครื่องหยุด','s-red',this)">🔴<br>มีเครื่องหยุด</button>
+    </div>
+  </div>
+
+  <!-- Card 5: เวลาหยุดและรหัสสาเหตุ -->
+  <div class="card">
+    <div class="card-title">⚠️ เวลาหยุดและรหัสสาเหตุ</div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>เวลาที่เครื่องหยุดทำงาน</label>
+      <div class="input-wrap">
+        <input type="number" id="minuteCount" placeholder="0" min="0" step="1">
+        <span class="unit">นาที</span>
+      </div>
+    </div>
+
+    <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;">รหัสสาเหตุหลัก (Error Code)</label>
+    <input type="hidden" id="notes-val">
+
+    <!-- Level 1: Category -->
+    <div class="ec-label">เลือกประเภทเครื่อง / หมวด</div>
+    <div class="ec-grid" id="ec-cat-grid"></div>
+
+    <!-- Level 2: Sub codes -->
+    <div class="ec-sub" id="ec-sub-panel"></div>
+
+    <!-- Selected display -->
+    <div class="ec-selected" id="ec-selected-display"></div>
+
+    <!-- อื่นๆ input -->
+    <input type="text" class="other-input" id="other-text" placeholder="ระบุรหัสหรือหมายเหตุเพิ่มเติม...">
+  </div>
+
+  <button class="btn-submit" id="submitBtn" onclick="submitForm()">บันทึกข้อมูลการผลิต</button>
+
+  <div class="savetag" id="saveTag"></div>
+
+</div>
+
+<div class="toast" id="toast"><div class="dot"></div><span id="toast-msg"></span></div>
+
+<script>
+// ========================================
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxt_H_cwfoAraz90CkQRbDUYaXujWLrGvC6OWrQBMSsAzgJMXV8y-d0S-SxgWwTnTPEkQ/exec";
+// ========================================
+
+if (SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+  document.getElementById('warn').style.display = 'block';
+}
+
+// สร้าง Time Slot options 07:00–21:00
+const timeSlotSelect = document.getElementById('timeSlot');
+for (let h = 7; h < 21; h++) {
+  const start = String(h).padStart(2,'0') + ':00';
+  const end   = String(h+1).padStart(2,'0') + ':00';
+  const opt = document.createElement('option');
+  opt.value = start + ' – ' + end;
+  opt.textContent = start + ' – ' + end;
+  timeSlotSelect.appendChild(opt);
+}
+
+// ---- Status ----
+function setStatus(val, cls, el) {
+  document.getElementById('status-val').value = val;
+  document.querySelectorAll('.status-btn').forEach(b => b.className = 'status-btn');
+  el.classList.add(cls);
+  if (val === 'เดินเครื่องปกติ') {
+    document.getElementById('minuteCount').value = '';
+    document.getElementById('notes-val').value   = '';
+    document.getElementById('other-text').value  = '';
+    document.getElementById('other-text').classList.remove('show');
+    selectedCat = null;
+    selectedCodes.clear();
+    document.querySelectorAll('.ec-cat').forEach(b => b.classList.remove('cat-active'));
+    document.getElementById('ec-sub-panel').classList.remove('show');
+    document.getElementById('ec-sub-panel').innerHTML = '';
+    document.getElementById('ec-selected-display').textContent = '';
+  }
+  saveDraft();
+}
+
+// ---- 2-Level Error Code Picker ----
+const ERROR_CODES = {
+  'A': { label:'A จ่ายกระป๋อง', items:['A1 สายพานขาด,เสีย','A2 โซ่ขาด,หลุด','A3 ปรับสายพาน Depallet','A4 หัวฉีดเสีย','A5 อื่นๆ(A)'] },
+  'B': { label:'B ตัดฉลาก',     items:['B1 น็อตหลุด','B2 สายพานขีดกระป๋องขาด','B3 เทปกาวสายพานหลุด','B4 ต้องเปลี่ยนตามแผนบำรุง','B5 ปรับแต่งเครื่องตัดฉลากเบี้ยว','B6 ล้อกาวเครื่องตัดฉลากเลื่อน','B7 รอกาวร้อนพร้อมใช้งาน','B8 ล้อกาวไม่หมุน','B9 อื่นๆ(B)'] },
+  'C': { label:'C เช็คโค้ด',    items:['C1 เซนเซอร์ขัดข้อง','C2 สายพานเครื่องขัดข้อง','C3 ปรับแต่งจาก Reject','C4 อื่นๆ(C)'] },
+  'D': { label:'D ตรวจน้ำหนัก', items:['D1 เซนเซอร์ขัดข้อง','D2 ปรับแต่งจาก Reject','D3 สายพานเครื่องขัดข้อง','D4 อื่นๆ(D)'] },
+  'E': { label:'E Shrink Wrap',  items:['E1 พื้นเพื่อไม่ทำงาน','E2 ปรับจากการใช้โค้ดใหม่','E3 ปรับแต่งเครื่อง','E4 เปลี่ยนม้วนฟิล์ม','E5 ฟิล์มไม่จ่าย','E6 มีดพันเดือยไม่ตัดฟิล์ม','E7 โซ่หลุด,ขาด','E8 รอความร้อนอุโมงค์','E9 อื่นๆ(E)'] },
+  'F': { label:'F ปิดเทป',       items:['F1 เปลี่ยนม้วนเทป','F2 ปรับตำแหน่งของเทป','F3 ปรับแต่งเทปหลุดจากกล่องจ่าย','F4 เปลี่ยนสายพานขับกล่อง','F5 น็อตหลุด ลูกกลิ้งม้วน','F6 มีดตัดเทปงอ,หัก','F7 อื่นๆ(F)'] },
+  'G': { label:'G บรรจุกระป๋อง', items:['G1 เซนเซอร์ตรวจจับขัดข้อง','G2 หัวแม่เหล็กดูดกระป๋องขัดข้อง','G3 ปรับแต่งโปรแกรมที่ใช้','G4 สายพานเครื่องขัดข้อง','G5 รอเปิดเครื่อง','G6 อื่นๆ(G)'] },
+  'H': { label:'H Inkjet',        items:['H1 เซนเซอร์ขัดข้อง','H2 ปรับตำแหน่งการยิงโค้ด,ลักษณะตัวอักษร','H3 เปลี่ยนน้ำหมึก','H4 อื่นๆ(H)'] },
+  'J': { label:'J จัดพาเลท',     items:['J1 เครื่องจัดพาเลทไม่ครบจำนวน','J2 ปรับตั้งลักษณะในการจัดเรียง','J3 หัว Gripper ไม่ทำงาน','J4 เซนเซอร์ตรวจจับขัดข้อง','J5 อื่นๆ(J)'] },
+  'K': { label:'K ตัดสติกเกอร์', items:['K1 เซนเซอร์เครื่องขัดข้อง','K2 เปลี่ยนม้วนสติกเกอร์','K3 อื่นๆ(K)'] },
+  'L': { label:'L ขึ้นรูปกล่อง', items:['L1 เซนเซอร์เครื่องขัดข้อง','L2 ระบบลมเครื่องขัดข้อง','L3 ชิ้นส่วนชำรุด','L4 อื่นๆ(L)'] },
+  'M': { label:'M สายพาน',       items:['M1 มอเตอร์สายพานเสีย','M2 สายพานขาด','M3 เปลี่ยนชิ้นส่วน','M4 อื่นๆ(M)'] },
+  'N': { label:'N สาธารณูปโภค',  items:['N1 ระบบไฟฟ้าสายการตัดฉลากขัดข้อง','N2 ระบบลมขัดข้อง (Pneumatic)'] },
+  'T':  { label:'T Changeover',  items:['T11 เปลี่ยนโค้ด ไม่เกิน 5 นาที','T12 เปลี่ยนไซส์ ไม่เกิน 45 นาที'] },
+  '101':{ label:'Planned',       items:['101 พักเที่ยง (60 นาที)','102 เปลี่ยนโค้ด ไม่เกิน 5 นาที','103 เปลี่ยนไซส์ ไม่เกิน 45 นาที'] },
+  '111':{ label:'Management',    items:['111 รอ QA ตรวจ','112 มีโค้ดกระป๋องปน','113 บรรจุภัณฑ์โค้ดปน','114 เตรียมความพร้อมพนักงาน','115 รอสินค้า','116 ตัดประปาเน่า','117 รถโฟล์คลิฟท์','118 ไม่มีพาเลท/รอพาเลท','119 ฉลากไม่พอ/รอฉลาก','120 เวลาพักเกิน 60 นาที','121 แทรกเส้นสินค้าอื่น','122 รอ Shrink Wrap','123 เส้น Mix ปัญหาคุณภาพ','124 รอบรรจุภัณฑ์จากบิ๊กกล่อง','125 เส้นไลน์อื่นก่อน','126 อื่นๆ(MG)'] },
+};
+
+let selectedCat = null;
+let selectedCodes = new Set(); // multi-select
+
+function buildCatGrid() {
+  const grid = document.getElementById('ec-cat-grid');
+  grid.innerHTML = '';
+  const cats = ['101','A','B','C','D','E','F','G','H','J','K','L','M','N','T','111'];
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'ec-cat' + (cat==='101'||cat==='111'?' cat-planned':'');
+    btn.textContent = cat;
+    btn.title = ERROR_CODES[cat].label;
+    btn.onclick = () => selectCat(cat, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function selectCat(cat, btn) {
+  // toggle — ถ้ากด category เดิมซ้ำ = ยกเลิก
+  if (selectedCat === cat) {
+    selectedCat = null;
+    selectedCodes.clear();
+    document.querySelectorAll('.ec-cat').forEach(b => b.classList.remove('cat-active'));
+    document.getElementById('ec-sub-panel').classList.remove('show');
+    document.getElementById('ec-sub-panel').innerHTML = '';
+    updateSelectedDisplay();
+    // ถ้า toggle ออก → reset status
+    document.getElementById('status-val').value = '';
+    document.querySelectorAll('.status-btn').forEach(b => b.className = 'status-btn');
+    saveDraft();
+    return;
+  }
+  selectedCat = cat;
+  document.querySelectorAll('.ec-cat').forEach(b => b.classList.remove('cat-active'));
+  btn.classList.add('cat-active');
+
+  const panel = document.getElementById('ec-sub-panel');
+  panel.innerHTML = '';
+  panel.classList.add('show');
+
+  ERROR_CODES[cat].items.forEach(code => {
+    const b = document.createElement('button');
+    b.className = 'ec-item' + (selectedCodes.has(code) ? ' item-active' : '');
+    b.textContent = code;
+    b.onclick = () => selectCode(code, b);
+    panel.appendChild(b);
+  });
+
+  // กด Category ปุ๊บ → เปลี่ยนเป็น "มีเครื่องหยุด" ทันที
+  setStatus('มีเครื่องหยุด', 's-red', document.getElementById('btn-stop'));
+  saveDraft();
+}
+
+function selectCode(code, btn) {
+  // toggle — กดซ้ำ = ยกเลิก code นั้น
+  if (selectedCodes.has(code)) {
+    selectedCodes.delete(code);
+    btn.classList.remove('item-active');
+  } else {
+    selectedCodes.add(code);
+    btn.classList.add('item-active');
+  }
+  updateSelectedDisplay();
+
+  // other-text: แสดงถ้ามี code ที่มีคำว่า อื่นๆ ถูกเลือกอยู่
+  const hasOther = [...selectedCodes].some(c => c.includes('อื่นๆ'));
+  const oi = document.getElementById('other-text');
+  if (hasOther) { oi.classList.add('show'); oi.focus(); }
+  else { oi.classList.remove('show'); oi.value = ''; }
+
+  saveDraft();
+}
+
+function updateSelectedDisplay() {
+  const codes = [...selectedCodes];
+  const display = document.getElementById('ec-selected-display');
+  const notesEl = document.getElementById('notes-val');
+  if (codes.length === 0) {
+    display.textContent = '';
+    notesEl.value = '';
+  } else {
+    display.textContent = '✔ เลือก: ' + codes.join(', ');
+    notesEl.value = codes.join(', ');
+  }
+}
+
+buildCatGrid();
+
+// ---- Toast ----
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.className = 'toast ' + type;
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ---- Highlight invalid field ----
+function markInvalid(id) {
+  const el = document.getElementById(id);
+  el.classList.add('invalid');
+  el.addEventListener('input', () => el.classList.remove('invalid'), { once: true });
+}
+
+// ========================================================
+// ---- Auto-save Draft (localStorage, expires in 8 hrs) ----
+// ========================================================
+const DRAFT_KEY = 'labelingFormDraft_v23';
+const DRAFT_TTL_MS = 8 * 60 * 60 * 1000; // 8 ชั่วโมง = 1 shift
+
+const TEXT_FIELD_IDS = ['line','orderRef','productCode','productDate','canSize','productRate',
+                         'goodCount','minuteCount','plannedMins','timeSlot','other-text'];
+
+function collectFormState() {
+  const state = {};
+  TEXT_FIELD_IDS.forEach(id => {
+    state[id] = document.getElementById(id).value;
+  });
+  state.statusVal    = document.getElementById('status-val').value;
+  state.selectedCat   = selectedCat;
+  state.selectedCodes = [...selectedCodes];
+  state.savedAt      = Date.now();
+  return state;
+}
+
+function saveDraft() {
+  try {
+    const state = collectFormState();
+    // ถ้าทุกฟิลด์ยังว่างเปล่า ไม่ต้องเซฟ (ลดการเขียน storage โดยไม่จำเป็น)
+    const hasContent = TEXT_FIELD_IDS.some(id => state[id] && state[id] !== '' && state[id] !== '60')
+                       || state.statusVal || (state.selectedCodes && state.selectedCodes.length > 0);
+    if (!hasContent) {
+      localStorage.removeItem(DRAFT_KEY);
+      updateSaveTag(null);
+      return;
+    }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+    updateSaveTag(state.savedAt);
+  } catch(e) { /* localStorage ใช้ไม่ได้ เช่น private mode — เงียบไว้ */ }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+  updateSaveTag(null);
+}
+
+function updateSaveTag(ts) {
+  const tag = document.getElementById('saveTag');
+  if (!ts) { tag.textContent = ''; return; }
+  const d = new Date(ts);
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  tag.textContent = `💾 บันทึกข้อมูลล่าสุดไว้ในเครื่องเมื่อ ${hh}:${mm} (จะหายเองหลัง 8 ชม.)`;
+}
+
+function getValidDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const state = JSON.parse(raw);
+    if (!state.savedAt || (Date.now() - state.savedAt) > DRAFT_TTL_MS) {
+      localStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+    return state;
+  } catch(e) { return null; }
+}
+
+function restoreDraft() {
+  const state = getValidDraft();
+  if (!state) { dismissDraft(); return; }
+
+  TEXT_FIELD_IDS.forEach(id => {
+    if (state[id] !== undefined && state[id] !== '') {
+      document.getElementById(id).value = state[id];
+    }
+  });
+
+  // restore status
+  if (state.statusVal === 'เดินเครื่องปกติ') {
+    setStatus('เดินเครื่องปกติ','s-green', document.querySelector('.status-btn'));
+  } else if (state.statusVal === 'มีเครื่องหยุด') {
+    document.getElementById('status-val').value = 'มีเครื่องหยุด';
+    document.querySelectorAll('.status-btn').forEach(b => b.className = 'status-btn');
+    document.getElementById('btn-stop').classList.add('s-red');
+  }
+
+  // restore error code (2-level)
+  if (state.selectedCat && ERROR_CODES[state.selectedCat]) {
+    const catBtn = Array.from(document.querySelectorAll('.ec-cat'))
+      .find(b => b.textContent === state.selectedCat);
+    if (catBtn) {
+      selectCat(state.selectedCat, catBtn);
+      if (state.selectedCodes && state.selectedCodes.length > 0) {
+        state.selectedCodes.forEach(code => {
+          const codeBtn = Array.from(document.querySelectorAll('.ec-item'))
+            .find(b => b.textContent === code);
+          if (codeBtn) selectCode(code, codeBtn);
+        });
+      }
+    }
+  }
+
+  updateSaveTag(state.savedAt);
+  document.getElementById('restoreBar').classList.remove('show');
+  toast('ดึงข้อมูลที่ค้างไว้กลับมาแล้ว ✓', 'ok');
+}
+
+function dismissDraft() {
+  clearDraft();
+  document.getElementById('restoreBar').classList.remove('show');
+}
+
+// ---- Reset (คงค่า line/orderRef/productCode/canSize/productRate ไว้) ----
+function resetForm() {
+  // ล้างเฉพาะ field ที่เปลี่ยนทุกชั่วโมง
+  ['goodCount','minuteCount'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('plannedMins').value = '60';
+  document.getElementById('status-val').value  = '';
+  document.getElementById('notes-val').value   = '';
+  document.getElementById('other-text').value  = '';
+  document.getElementById('other-text').classList.remove('show');
+  document.querySelectorAll('.status-btn').forEach(b => b.className = 'status-btn');
+  // reset 2-level picker
+  selectedCat = null;
+  selectedCodes.clear();
+  document.querySelectorAll('.ec-cat').forEach(b => b.classList.remove('cat-active'));
+  document.getElementById('ec-sub-panel').classList.remove('show');
+  document.getElementById('ec-sub-panel').innerHTML = '';
+  updateSelectedDisplay();
+  document.getElementById('timeSlot').selectedIndex = 0;
+  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+  clearDraft();
+}
+
+// ---- Submit ----
+async function submitForm() {
+  const line        = document.getElementById('line').value.trim();
+  const orderRef    = document.getElementById('orderRef').value.trim();
+  const productCode = document.getElementById('productCode').value.trim();
+  const productDate = document.getElementById('productDate').value.trim();
+  const canSize     = document.getElementById('canSize').value.trim();
+  const productRate = document.getElementById('productRate').value.trim();
+  const goodCount  = document.getElementById('goodCount').value.trim();
+  const minuteCount = document.getElementById('minuteCount').value.trim();
+  const plannedMins = document.getElementById('plannedMins').value.trim();
+  const status      = document.getElementById('status-val').value;
+  const timeSlot    = document.getElementById('timeSlot').value;
+  let notes = [...selectedCodes].join(', ');
+  if (notes && notes.includes('อื่นๆ')) {
+    const extra = document.getElementById('other-text').value.trim();
+    notes = extra ? notes + ': ' + extra : notes;
+  }
+
+  // --- Validation ---
+  if (!line || !orderRef || !productCode) {
+    if (!line)        markInvalid('line');
+    if (!orderRef)    markInvalid('orderRef');
+    if (!productCode) markInvalid('productCode');
+    if (!productDate) markInvalid('productDate');
+    toast('❌ กรุณากรอกข้อมูลงานหลักให้ครบ', 'err');
+    return;
+  }
+  if (!timeSlot) {
+    toast('❌ กรุณาเลือกช่วงเวลาผลิต', 'err');
+    return;
+  }
+  if (!plannedMins || Number(plannedMins) <= 0) {
+    markInvalid('plannedMins');
+    toast('❌ กรุณากรอกเวลาแผน (นาที)', 'err');
+    return;
+  }
+  if (goodCount === '') {
+    markInvalid('goodCount');
+    toast('❌ กรุณากรอกยอดผลิต (กล่อง/ชม.)ก่อนบันทึก', 'err');
+    return;
+  }
+  if (Number(goodCount) < 0) {
+    markInvalid('goodCount');
+    toast('❌ ยอดผลิต (กล่อง/ชม.)ต้องไม่ติดลบ', 'err');
+    return;
+  }
+  if (!status) {
+    toast('❌ กรุณาเลือกสถานะการเดินเครื่อง', 'err');
+    return;
+  }
+  if (SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+    toast('ยังไม่ได้ใส่ URL ใหม่', 'err');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก...';
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        line, orderRef, productCode, productDate, canSize,
+        productRate, timeSlot,
+        dailyTotal:  goodCount,
+        defectTotal: 0,
+        minuteCount, plannedMins,
+        status, notes
+      })
+    });
+    toast('บันทึกสำเร็จ ✓', 'ok');
+    resetForm();
+  } catch(err) {
+    toast('เกิดข้อผิดพลาด ลองใหม่', 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'บันทึกข้อมูลการผลิต';
+}
+
+// ---- Bind auto-save listeners ----
+TEXT_FIELD_IDS.forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', saveDraft);
+  el.addEventListener('change', saveDraft);
+});
+
+// ---- On load: check for existing draft ----
+window.addEventListener('DOMContentLoaded', () => {
+  const draft = getValidDraft();
+  if (draft) {
+    document.getElementById('restoreBar').classList.add('show');
+    updateSaveTag(draft.savedAt);
+  }
+});
+</script>
+</body>
+</html>
